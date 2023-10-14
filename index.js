@@ -59,11 +59,39 @@ http.createServer(function (req, res) {
             let insertQuery = `INSERT INTO tasks (TaskName) VALUES ('${postBody.TaskName}');`;
             con.query(insertQuery, function (err, result, fields) {
                 if (err) throw err;
-                console.log(result);
+                // console.log(result);
                 res.end(JSON.stringify(result));
             });
         });
         // res.end('Task Added');
+    }
+    else if( req.method === 'POST' && reqUrl.pathname === '/updateTask'){
+        res.writeHead(200, { 'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*' });
+        var body = '';
+        req.on('data',  function (chunk) {
+            postBody = JSON.parse(chunk);
+            let updateQuery = `UPDATE tasks SET TaskName =  '${postBody.TaskName}' WHERE TaskId = ${postBody.TaskId};`;
+            con.query(updateQuery, function (err, result, fields) {
+                if (err) throw err;
+                // console.log(result);
+                res.end(JSON.stringify({status: 'success'}));
+            });
+        });
+    }
+    else if( req.method === 'POST' && reqUrl.pathname === '/deleteTask'){
+        res.writeHead(200, { 'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*' });
+        var body = '';
+        req.on('data',  function (chunk) {
+            postBody = JSON.parse(chunk);
+            let deleteQuery = `DELETE FROM tasks WHERE TaskId = ${postBody.TaskId};`;
+            con.query(deleteQuery, function (err, result, fields) {
+                if (err) throw err;
+                // console.log(result);
+                res.end(JSON.stringify({status: 'delete success'}));
+            });
+        });
     }
     else{
         res.end('Check the URL');
