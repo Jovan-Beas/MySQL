@@ -3,7 +3,7 @@ var mysql = require('mysql');
 var con = mysql.createConnection({
     host: "localhost",
     user: "root",
-    password: "",
+    password: "password",
     database: "nodetest"
 });
 
@@ -55,7 +55,7 @@ http.createServer(function (req, res) {
         req.on('data',  function (chunk) {
             body += chunk;
             postBody = JSON.parse(body);
-            console.log(postBody);
+            //console.log(postBody);
             let insertQuery = `INSERT INTO tasks (TaskName) VALUES ('${postBody.TaskName}');`;
             con.query(insertQuery, function (err, result, fields) {
                 if (err) throw err;

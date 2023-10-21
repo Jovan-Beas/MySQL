@@ -1,0 +1,14 @@
+#todoList li{
+    color: rgb(13, 0, 255);
+    margin-bottom: 15px;
+}
+
+.editButton{
+    margin-left: 10px;
+    color: seagreen;
+}
+
+.deleteButton{
+    margin-left: 10px;
+    color: red;
+}
