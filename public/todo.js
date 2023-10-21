@@ -1,11 +1,24 @@
 let todoList = [];
-
+let filteredList =[];
 // var editBox = $('#EditBox');
 var editInput = $('#editTodo');
 var editItem_data;
 var AddInput = $('#AddTodoInput');
 // editBox.hide();
-
+$("#find").keyup(event=>{let search_string = event.target.value; search(search_string)})
+function search (search_string){
+    //console.log("key pressed",event.target.value); //CHecking the value of the word entered
+    if(search_string!='')
+    {
+      filteredList=todoList.filter(item=>item.TaskName.includes(search_string));
+      displayTodo();
+    }
+    else
+    {
+        filteredList = todoList;
+        displayTodo();
+    }
+}
 getTodoList();
 
 function getTodoList() {
@@ -15,7 +28,10 @@ function getTodoList() {
         success: function (result) {
             let data = JSON.parse(result);
             todoList = data;
-            displayTodo();
+            filteredList= data;
+            let search_string = $('#find').val();
+            search(search_string);
+            //displayTodo();
         },
         error: function (error) {
             console.error(error);
@@ -42,7 +58,8 @@ function displayTodo() {
     // }
     const todoTableElement = $('#todoTable');
     todoTableElement.html('');
-    todoList.forEach(todo => {
+    // todoList.forEach(todo => {
+        filteredList.forEach(todo => {
         let tr = document.createElement("tr");
         tr.innerHTML = `<td>${todo['TaskName']}</td>
             <td><button class="btn btn-info" onclick="editItem(${todo['TaskId']})"  data-toggle="modal" data-target="#exampleModal">Edit</button></td>
