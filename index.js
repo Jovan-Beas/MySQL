@@ -41,7 +41,7 @@ http.createServer(function (req, res) {
         res.writeHead(200, { 'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*' });
         let data = [];
-        con.query("SELECT TaskId, TaskName FROM tasks", function (err, result, fields) {
+        con.query("SELECT TaskId, TaskName, IsComplete FROM tasks WHERE IsDeleted = 0", function (err, result, fields) {
             if (err) throw err;
             data = result;
             res.write(JSON.stringify(data));
@@ -85,11 +85,27 @@ http.createServer(function (req, res) {
         var body = '';
         req.on('data',  function (chunk) {
             postBody = JSON.parse(chunk);
-            let deleteQuery = `DELETE FROM tasks WHERE TaskId = ${postBody.TaskId};`;
+            //let deleteQuery = `DELETE FROM tasks WHERE TaskId = ${postBody.TaskId};`;
+            let deleteQuery = `UPDATE tasks SET IsDeleted = 1 WHERE TaskId = ${postBody.TaskId}`;
             con.query(deleteQuery, function (err, result, fields) {
                 if (err) throw err;
                 // console.log(result);
                 res.end(JSON.stringify({status: 'delete success'}));
+            });
+        });
+    }
+    else if( req.method === 'POST' && reqUrl.pathname === '/completeTask'){
+        res.writeHead(200, { 'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*' });
+        //var body = '';
+        req.on('data',  function (chunk) {
+            postBody = JSON.parse(chunk);
+            //let deleteQuery = `DELETE FROM tasks WHERE TaskId = ${postBody.TaskId};`;
+            let completeQuery = `UPDATE tasks SET IsComplete = 1 WHERE TaskId = ${postBody.TaskId}`;
+            con.query(completeQuery, function (err, result, fields) {
+                if (err) throw err;
+                // console.log(result);
+                res.end(JSON.stringify({status: 'complete success'}));
             });
         });
     }

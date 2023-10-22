@@ -61,9 +61,13 @@ function displayTodo() {
     // todoList.forEach(todo => {
         filteredList.forEach(todo => {
         let tr = document.createElement("tr");
+        let IsComplete_td = todo['IsComplete'] == 0 
+            ? `<td><button class="btn btn-success" onclick="completeItem(${todo['TaskId']})">Complete</button></td>`
+                : `<td class="CompletedTask" > Complete </td>`;
+
         tr.innerHTML = `<td>${todo['TaskName']}</td>
             <td><button class="btn btn-info" onclick="editItem(${todo['TaskId']})"  data-toggle="modal" data-target="#exampleModal">Edit</button></td>
-            <td><button class="btn btn-danger" onclick="deleteItem(${todo['TaskId']})">Delete</button></td>`;
+            <td><button class="btn btn-danger" onclick="deleteItem(${todo['TaskId']})">Delete</button></td>` + IsComplete_td;
         todoTableElement.append(tr);
     });
 }
@@ -109,6 +113,27 @@ function deleteItem(TaskId) {
     // displayTodo();
     $.ajax({
         url: "http://localhost:4500/deleteTask",
+        method: "POST",
+        dataType: "text",
+        data: JSON.stringify({
+            TaskId: TaskId          
+        }),
+        success: function (result) {
+            // console.log(result);
+            getTodoList();
+        },
+        error: function (error) {
+            console.error(error);
+        },
+        timeout: 3000
+    });
+}
+
+function completeItem(TaskId) {
+    // todoList.splice(index, 1);
+    // displayTodo();
+    $.ajax({
+        url: "http://localhost:4500/completeTask",
         method: "POST",
         dataType: "text",
         data: JSON.stringify({
