@@ -1,7 +1,8 @@
 const { createTodo, getTodoList, getTodoById, updateTodo, deleteTodo } = require('./todo.controller');
 const router = require('express').Router();
+const auth = require('../middleware/auth');
 
-router.get('/', getTodoList);
+router.get('/', auth, getTodoList);
 router.post('/', createTodo);
 router.get('/:TaskId', getTodoById);
 router.patch('/', updateTodo);
