@@ -40,9 +40,9 @@ module.exports = {
             }
         );
     },
-    getSaltFromDatabase: (Email, callBack) => {
+    getUserData: (Email, callBack) => {
         pool.query(
-            `SELECT PasswordSalt FROM users WHERE Email = ?`,
+            `SELECT UserID, FirstName, LastName, PasswordSalt, Password FROM users WHERE Email = ?`,
             [ Email ],
             (error, results, fields) => {
                 if (error) {

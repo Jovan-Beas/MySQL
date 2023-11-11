@@ -1,29 +1,30 @@
-const { createUser, signIn, getSaltFromDatabase } = require("./auth.service");
+const { createUser, getUserData } = require("./auth.service");
+require('dotenv').config();
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 module.exports = {
     SignUp: (req, res) => {
-        let passwordSalt = '';
-        const userData = req.body;
-        if(userData.FirstName == null || userData.Email == null || userData.Password == null) {
+        const{ FirstName, LastName, Email, Password } = req.body;
+        if(FirstName == null || Email == null || Password == null) {
             return res.json({
                 success: 0,
                 message: "Please fill all fields"
             });
         }
-        if(validateEmail(userData.Email) == false) {
+        if(validateEmail(Email) == false) {
             return res.json({
                 success: 0,
                 message: "Invalid email"
             });
         }
-        if(userData.Password.length < 6) {
+        if(Password.length < 6) {
             return res.json({
                 success: 0,
                 message: "Password must be at least 6 characters"
             });
         }
-        getSaltFromDatabase(userData.Email, async (err, results) => {
+        getSaltFromDatabase(Email, async (err, results) => {
             if(err) {
                 console.log(err);
                 return res.status(500).json({
@@ -39,11 +40,11 @@ module.exports = {
             }
             else{
                 let salt = await bcrypt.genSalt(10);
-                let hash = await bcrypt.hash(userData.Password, salt);
+                let hash = await bcrypt.hash(Password, salt);
                 const body = {
-                    FirstName: userData.FirstName,
-                    LastName: userData.LastName,
-                    Email: userData.Email,
+                    FirstName: FirstName,
+                    LastName: LastName,
+                    Email: Email,
                     Password: hash,
                     PasswordSalt: salt
                 };
@@ -77,7 +78,7 @@ module.exports = {
                 message: "Invalid email"
             });
         }
-        getSaltFromDatabase(userData.Email, (err, results) => {
+        getUserData(userData.Email, async (err, results) => {
             if(err) {
                 console.log(err);
                 return res.status(500).json({
@@ -91,29 +92,29 @@ module.exports = {
                     message: "User not found"
                 });
             }
-            //userData.PasswordSalt = results.PasswordSalt;
-            bcrypt.hash(userData.Password, results.PasswordSalt)
-            .then(hash => {
-                const body = {
-                    Email: userData.Email,
-                    Password: hash
-                };
-                signIn(body, (err, results) => {
-                    if(err) {
-                        console.log(err);
-                        return res.status(500).json({
-                            success: 0,
-                            message: "Database connection error"
-                        });
-                    }
-                    return res.status(200).json({
-                        success: 1,
-                        message: "User logged in successfully",
-                        data: results
-                    });
+            let isLoggedIn = await bcrypt.compare(userData.Password, results.Password);
+            if(isLoggedIn)
+            {
+                let userData = {
+                    UserID: results.UserID,
+                    FirstName: results.FirstName,
+                    LastName: results.LastName,
+                    Email: results.Email,
+                }
+                let token = jwt.sign({ userData: userData }, process.env.JWT_KEY, { expiresIn: '1h' });
+                return res.status(200).json({
+                    success: 1,
+                    message: "User logged in successfully",
+                    data: userData,
+                    token: token
                 });
-            })
-            .catch(err => console.error(err.message));
+            }
+            else{
+                return res.json({
+                    success: 0,
+                    message: "Credentials do not match"
+                });
+            }
         });
     }
 }
