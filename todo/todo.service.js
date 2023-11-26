@@ -2,9 +2,9 @@ const pool = require('../config/database');
 
 module.exports = {
     
-    getTodos: (callBack) => {
+    getTodos: (UserID,callBack) => {
         try {
-            pool.query(`SELECT TaskId, TaskName FROM tasks`, [], (error, results, fields) => {
+            pool.query(`SELECT TaskId, TaskName FROM tasks WHERE UserID=? AND IsDeleted=0`, [UserID], (error, results, fields) => {
                 if (error) {
                     return callBack(error);
                 }
@@ -15,28 +15,30 @@ module.exports = {
             return callBack(error);
         }
     },
-    create: (TaskName, callBack) => {
-        pool.query(`insert into tasks(TaskName) values(?)`, [ TaskName ], (error, results, fields) => {
+    create: (UserID,TaskName, callBack) => {
+        pool.query(`insert into tasks(TaskName, UserID) values(?,?)`, [ TaskName, UserID ], (error, results, fields) => {
             if (error) {
                 return callBack(error);
             }
             return callBack(null, results);
         });
     },
-    getTodoById: (id, callBack) => {
-        pool.query(`SELECT TaskId, TaskName FROM tasks where TaskId = ?`, [id], (error, results, fields) => {
+    getTodoById: (UserID,id, callBack) => {
+        pool.query(`SELECT TaskId, TaskName FROM tasks where TaskId = ? AND UserID = ?`, [id, UserID], (error, results, fields) => {
             if (error) {
                 return callBack(error);
             }
             return callBack(null, results[0]);
         });
     },
-    updateTodo: (data, callBack) => {
+    updateTodo: (UserID,TaskName,TaskId, callBack) => {
+       
         pool.query(
-            `update tasks set TaskName = ? where TaskId = ?`,
+            `update tasks set TaskName = ? where TaskId = ? AND UserID=?`,
             [
-                data.TaskName,
-                data.TaskId
+                TaskName,
+                TaskId,
+                UserID
             ],
             (error, results, fields) => {
                 if (error) {
@@ -46,13 +48,24 @@ module.exports = {
             }
         );
     },
-    deleteTodo: (TaskId, callBack) => {
-        pool.query(`delete from tasks where TaskId = ?`, [TaskId], (error, results, fields) => {
+    deleteTodo: (UserID,TaskId, callBack) => {
+        pool.query(`UPDATE tasks SET IsDeleted=1 where TaskId = ? AND UserID = ?`, [TaskId, UserID], (error, results, fields) => {
                 if (error) {
                     return callBack(error);
                 }
                 return callBack(null, results);
             }
         );
-    }
+    },
+
+    isCompleted: (UserID,TaskId, callBack) => {
+        pool.query(`UPDATE tasks SET IsComplete=1 where TaskId = ? AND UserID = ?`, [TaskId, UserID], (error, results, fields) => {
+                if (error) {
+                    return callBack(error);
+                }
+                return callBack(null, results);
+            }
+        );
+    },
+
 }

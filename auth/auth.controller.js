@@ -24,7 +24,7 @@ module.exports = {
                 message: "Password must be at least 6 characters"
             });
         }
-        getSaltFromDatabase(Email, async (err, results) => {
+        getUserData(Email, async (err, results) => {
             if(err) {
                 console.log(err);
                 return res.status(500).json({
